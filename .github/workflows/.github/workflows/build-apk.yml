@@ -1,1 +1,42 @@
+name: Build ShopMaster APK
 
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Extract project ZIP
+        run: |
+          unzip -o "ShopMaster-Fixed-KSP.zip" -d .
+
+      - name: Make Gradle executable
+        run: chmod +x shopfix/gradlew
+
+      - name: Build Debug APK
+        working-directory: shopfix
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ShopMaster-debug-APK
+          path: shopfix/app/build/outputs/apk/debug/*.apk
+          
